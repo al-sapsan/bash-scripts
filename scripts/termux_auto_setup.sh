@@ -8,14 +8,16 @@
 #   DESCRIPTION:TERMUX EMBEDDED & ROBOTICS WORKFLOW INSTALLER
 #
 #        Target: Termux (Android)
-#  REQUIREMENTS: ---
+#  REQUIREMENTS: chmod +x termux_auto_setup.sh
 #          BUGS: ---
 #         NOTES: ---
 #        AUTHOR: Oleg Sokolov (Al`Sapsan), 
 #  ORGANIZATION: al.sapsan@mail.ru
 #       CREATED: 16.01.2026 19:34:53
-#      REVISION:  0.1
+#      REVISION:  1.1
 #===============================================================================
+
+#!/bin/bash
 
 set -e # Exit immediately if a command exits with a non-zero status
 
@@ -27,7 +29,6 @@ NC='\033[0m' # No Color
 
 log() { echo -e "${BLUE}[SETUP]${NC} $1"; }
 success() { echo -e "${GREEN}[DONE]${NC} $1"; }
-error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 log "Starting Termux Hardening Process..."
 
@@ -37,7 +38,7 @@ log "Starting Termux Hardening Process..."
 log "Updating repositories and installing core packages..."
 pkg update -y && pkg upgrade -y
 
-# Core Tools
+# Core Tools (Removed gcompat)
 PACKAGES=(
     zsh git wget curl unzip tar
     neovim vim
@@ -45,7 +46,6 @@ PACKAGES=(
     python
     ripgrep fd bat eza zoxide fzf
     termux-api
-    gcompat # Required for Codeium AI
 )
 
 pkg install -y "${PACKAGES[@]}"
@@ -184,7 +184,6 @@ Plug 'ryanoasis/vim-devicons'
 Plug 'morhetz/gruvbox' 
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
-Plug 'Exafunction/codeium.vim', { 'branch': 'main' }
 Plug 'tpope/vim-fugitive'
 Plug 'voldikss/vim-floaterm'
 Plug 'neoclide/coc.nvim', { 'branch': 'release' }
@@ -212,11 +211,6 @@ nnoremap <leader>p :let @"=system("termux-clipboard-get")<CR>p
 nnoremap <leader>ff :Files<CR>
 nnoremap <leader>fg :Rg<CR>
 nnoremap <silent> <leader>gg :FloatermNew --height=0.9 --width=0.9 --name=lazygit lazygit<CR>
-
-" Codeium
-let g:codeium_disable_bindings = 1
-inoremap <script><silent><nowait><expr> <C-a> codeium#Accept()
-inoremap <C-x> <Cmd>call codeium#Chat()<CR>
 
 " CoC
 inoremap <silent><expr> <TAB> coc#pum#visible() ? coc#pum#next(1) : "\<Tab>"
@@ -296,11 +290,6 @@ require("lazy").setup({
     "hrsh7th/nvim-cmp",
     dependencies = { "hrsh7th/cmp-nvim-lsp", "L3MON4D3/LuaSnip" },
     config = function() require("config.cmp") end
-  },
-  {
-    "monkoose/neocodeium",
-    event = "InsertEnter",
-    config = function() require("config.neocodeium") end
   },
   {
     "Civitasv/cmake-tools.nvim",
@@ -390,15 +379,6 @@ require("nvim-treesitter.configs").setup({
   ensure_installed = { "c", "cpp", "lua", "bash", "python", "cmake" },
   highlight = { enable = true },
 })
-EOF
-
-# config/neocodeium.lua
-cat > "$NVIM_DIR/lua/config/neocodeium.lua" <<'EOF'
-local neocodeium = require("neocodeium")
-neocodeium.setup({ manual = true, silent = true })
-vim.keymap.set("i", "<C-a>", neocodeium.accept)
-vim.keymap.set("i", "<C-s>", neocodeium.cycle_or_complete)
-vim.keymap.set("n", "<leader>ai", "<cmd>NeoCodeium chat<CR>")
 EOF
 
 # config/cmp.lua
