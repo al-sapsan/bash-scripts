@@ -1,6 +1,3 @@
-Here's a README.md for your number base converter script following the template:
-
-```markdown
 # Base Converter v2.0 – User Guide
 
 ## 📋 "Two Words" Description:
